@@ -21,6 +21,12 @@ export class VpnBotUpdate {
       { command: Commands.UNSUBSCRIBE, description: 'Отменить подписку' },
     ]);
 
+    const subscribersCount = this.subscriberUserCase.getSubscribers().length;
+
+    if (subscribersCount === 5) {
+      return 'На данный момент желающих слишком много, вернусь к тебе чуть позже. Спасибо за понимание!';
+    }
+
     const nickname = ctx.message.from.username;
 
     const subscriber =
