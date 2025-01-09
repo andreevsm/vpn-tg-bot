@@ -11,7 +11,7 @@ import { join } from 'path';
   imports: [
     TelegrafModule.forRootAsync({
       useFactory: () => ({
-        token: '7222418734:AAEVJQzNHkYYhk5ql3rVtMsWRLqi7TLpMrY',
+        token: process.env.TG_BOT_KEY,
         middlewares: [session()],
         include: [VpnBotModule],
       }),
