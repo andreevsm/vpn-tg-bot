@@ -33,4 +33,13 @@ export class SubscriberRepository {
     );
     writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
   }
+
+  public updateSubscriber(subscriber: SubscriberEntity): void {
+    const subscribers = this.getSubscribers();
+    const newSubscribers = subscribers.map((s) =>
+      s.nickname === subscriber.nickname ? { ...subscriber } : { ...s },
+    );
+
+    writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
+  }
 }

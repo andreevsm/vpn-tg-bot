@@ -23,4 +23,8 @@ export class SubscriberUseCase {
   public removeSubscriber(subscriber: SubscriberEntity): void {
     this.subscriberRepository.removeSubscriber(subscriber);
   }
+
+  public updateSubscriber(subscriber: SubscriberEntity): void {
+    this.subscriberRepository.updateSubscriber(subscriber);
+  }
 }

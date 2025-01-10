@@ -4,12 +4,14 @@ import { Subscriber, SubscriptionPlan, SubscriptionStatus } from 'src/types';
 import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
 import { Commands } from 'src/common/constants';
 import { HELP_SCENE_ID, UNSUBSCRIBE_SCENE_ID } from 'src/app.constants';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Update()
 export class VpnBotUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
     private subscriberUserCase: SubscriberUseCase,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
 
   @Start()
@@ -159,18 +161,43 @@ export class VpnBotUpdate {
 
       const subscribersCount = this.subscriberUserCase.getSubscribers().length;
 
+      const currentTime = +new Date();
+
+      const oneDay = 24 * 60 * 60 * 1000;
+      const expiredAtTime = currentTime + oneDay;
+
       this.subscriberUserCase.addSubscriber({
         id: userInfo.id,
         firstName: userInfo['first_name'],
         nickname: userInfo.username,
-        createdAt: +new Date(),
-        exparedAt: +new Date() + 24 * 60 * 60 * 1000,
+        createdAt: currentTime,
+        exparedAt: expiredAtTime,
         configName: `anse-vpn-bot-${subscribersCount + 1}`,
         subscription: {
           plan: SubscriptionPlan.TRIAL,
           status: SubscriptionStatus.ACTIVE,
         },
       });
+
+      const timeoutId = setTimeout(() => {
+        const subscriber = this.subscriberUserCase.getSubscriberByNickname(
+          userInfo.username,
+        );
+
+        const subscriberWithExpiredTrial = {
+          ...subscriber,
+          subscription: {
+            plan: SubscriptionPlan.TRIAL,
+            status: SubscriptionStatus.EXPIRED,
+          },
+        };
+
+        this.subscriberUserCase.updateSubscriber(subscriberWithExpiredTrial);
+
+        ctx.sendMessage('Твоя демо подписка закончилась!');
+      }, oneDay);
+
+      this.schedulerRegistry.addTimeout('trial-exprided', timeoutId);
 
       ctx.telegram.sendDocument(ctx.chat.id, {
         source: `vpn-configs/anse-vpn-bot-${subscribersCount + 1}.conf`,
