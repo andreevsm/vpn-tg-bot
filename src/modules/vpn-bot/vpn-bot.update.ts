@@ -23,7 +23,9 @@ export class VpnBotUpdate {
       { command: Commands.UNSUBSCRIBE, description: 'Отменить подписку' },
     ]);
 
-    const subscribersCount = this.subscriberUserCase.getSubscribers().length;
+    const subscribersCount = this.subscriberUserCase
+      .getSubscribers()
+      .filter((sub) => sub.configName !== '').length;
 
     if (subscribersCount === 5) {
       return 'На данный момент желающих слишком много, вернусь к тебе чуть позже. Спасибо за понимание!';
@@ -159,7 +161,9 @@ export class VpnBotUpdate {
         ).toLocaleString()}`;
       }
 
-      const subscribersCount = this.subscriberUserCase.getSubscribers().length;
+      const subscribersCount = this.subscriberUserCase
+        .getSubscribers()
+        .filter((sub) => sub.configName !== '').length;
 
       const currentTime = +new Date();
 
@@ -186,6 +190,7 @@ export class VpnBotUpdate {
 
         const subscriberWithExpiredTrial = {
           ...subscriber,
+          configName: '',
           subscription: {
             plan: SubscriptionPlan.TRIAL,
             status: SubscriptionStatus.EXPIRED,
