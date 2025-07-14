@@ -2,3 +2,4 @@ export const HELLO_SCENE_ID = 'HELLO_SCENE_ID';
 
 export const UNSUBSCRIBE_SCENE_ID = 'UNSUBSCRIBE_SCENE_ID';
 export const HELP_SCENE_ID = 'HELP_SCENE_ID';
+export const ADMIN_SCENE_ID = 'ADMIN_SCENE_ID';

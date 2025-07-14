@@ -3,4 +3,5 @@ export enum Commands {
   SUBSCRIPTION = 'subscription',
   HELP = 'help',
   UNSUBSCRIBE = 'unsubscribe',
+  ADMIN = 'admin',
 }
