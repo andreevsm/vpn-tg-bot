@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { VpnBotUpdate } from './vpn-bot.update';
+import { BotUpdate } from './bot.update';
 import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
 import { SubscriberRepository } from 'src/core/repositories/subscriber.repository';
 import { UnsubscribeWizard } from './unsubscribe.wizard';
@@ -8,7 +8,7 @@ import { AdminWizard } from './admin.wizard';
 
 @Module({
   providers: [
-    VpnBotUpdate,
+    BotUpdate,
     SubscriberUseCase,
     SubscriberRepository,
     UnsubscribeWizard,
@@ -16,4 +16,4 @@ import { AdminWizard } from './admin.wizard';
     AdminWizard,
   ],
 })
-export class VpnBotModule {}
+export class BotModule {}

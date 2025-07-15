@@ -1,6 +1,6 @@
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
 import { Context, Scenes, Telegraf } from 'telegraf';
-import { SubscriptionPlan, SubscriptionStatus } from 'src/types';
+import { SubscriptionPlan, SubscriptionStatus } from 'src/common/types/types';
 import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
 import { Commands } from 'src/common/constants';
 import {
@@ -9,9 +9,10 @@ import {
   UNSUBSCRIBE_SCENE_ID,
 } from 'src/app.constants';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { SUBSCRIBERS_LIMIT } from 'src/common/constants/subscribers-limit.constant';
 
 @Update()
-export class VpnBotUpdate {
+export class BotUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
     private subscriberUserCase: SubscriberUseCase,
@@ -38,15 +39,13 @@ export class VpnBotUpdate {
       });
     }
 
-    console.log(commands);
-
     await this.bot.telegram.setMyCommands(commands);
 
     const subscribersCount = this.subscriberUserCase
       .getSubscribers()
       .filter((sub) => sub.configName !== '').length;
 
-    if (subscribersCount === 5) {
+    if (subscribersCount === SUBSCRIBERS_LIMIT) {
       return 'На данный момент желающих слишком много, вернусь к тебе чуть позже. Спасибо за понимание!';
     }
 

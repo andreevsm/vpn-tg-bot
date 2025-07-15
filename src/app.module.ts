@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
-import { VpnBotModule } from './modules/vpn-bot/vpn-bot.module';
+import { BotModule } from './modules/bot/bot.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -15,13 +15,13 @@ import { ScheduleModule } from '@nestjs/schedule';
       useFactory: () => ({
         token: process.env.TG_BOT_KEY,
         middlewares: [session()],
-        include: [VpnBotModule],
+        include: [BotModule],
       }),
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    VpnBotModule,
+    BotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,4 +1,4 @@
-import { SubscriptionPlan, SubscriptionStatus } from 'src/types';
+import { SubscriptionPlan, SubscriptionStatus } from 'src/common/types/types';
 
 export interface SubscriberEntity {
   id: number;

@@ -3,7 +3,7 @@ import { ADMIN_SCENE_ID } from '../../app.constants';
 import { Markup } from 'telegraf';
 import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
 import { SceneContext } from 'telegraf/typings/scenes';
-import { SubscriptionPlan, SubscriptionStatus } from 'src/types';
+import { SubscriptionPlan, SubscriptionStatus } from 'src/common/types/types';
 
 @Scene(ADMIN_SCENE_ID)
 export class AdminWizard {
