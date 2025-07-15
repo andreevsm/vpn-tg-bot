@@ -1,9 +1,9 @@
 import { Ctx, On, Scene, SceneEnter } from 'nestjs-telegraf';
-import { ADMIN_SCENE_ID } from '../../app.constants';
 import { Markup } from 'telegraf';
 import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
 import { SceneContext } from 'telegraf/typings/scenes';
 import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { ADMIN_SCENE_ID } from '@common/constants/scenes.constant';
 
 @Scene(ADMIN_SCENE_ID)
 export class AdminWizard {

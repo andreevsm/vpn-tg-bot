@@ -10,6 +10,9 @@ import {
   ADMIN_SCENE_ID,
 } from '@common/constants/scenes.constant';
 import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
+import { UseGuards } from '@nestjs/common';
+import { ADMIN_IDS } from '@common/constants/admin-ids.constant';
+import { AdminGuard } from '@common/guards/admin.guard';
 
 @Update()
 export class BotUpdate {
@@ -24,6 +27,7 @@ export class BotUpdate {
     console.log(ctx.message.from);
 
     const nickname = ctx.message.from.username;
+    const userId = ctx.message.from.id;
 
     const commands = [
       { command: Commands.START, description: 'Начать' },
@@ -32,7 +36,7 @@ export class BotUpdate {
       { command: Commands.UNSUBSCRIBE, description: 'Отменить подписку' },
     ];
 
-    if (nickname === 'aandreevsm') {
+    if (ADMIN_IDS.includes(userId)) {
       commands.push({
         command: Commands.ADMIN,
         description: 'Админка',
@@ -662,7 +666,10 @@ export class BotUpdate {
   }
 
   @Command(Commands.ADMIN)
+  @UseGuards(AdminGuard)
   async onAdminCommand(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+    console.log('mmmm', (ctx.update as any).message);
+
     await ctx.scene.enter(ADMIN_SCENE_ID);
   }
 }

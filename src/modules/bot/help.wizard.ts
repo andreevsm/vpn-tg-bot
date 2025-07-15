@@ -1,5 +1,5 @@
+import { HELP_SCENE_ID } from '@common/constants/scenes.constant';
 import { Ctx, Message, On, Wizard, WizardStep } from 'nestjs-telegraf';
-import { HELP_SCENE_ID } from '../../app.constants';
 import { WizardContext } from 'telegraf/typings/scenes';
 
 @Wizard(HELP_SCENE_ID)
