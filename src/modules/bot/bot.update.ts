@@ -1,15 +1,15 @@
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
 import { Context, Scenes, Telegraf } from 'telegraf';
-import { SubscriptionPlan, SubscriptionStatus } from 'src/common/types/types';
-import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
-import { Commands } from 'src/common/constants';
-import {
-  ADMIN_SCENE_ID,
-  HELP_SCENE_ID,
-  UNSUBSCRIBE_SCENE_ID,
-} from 'src/app.constants';
+import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { Commands } from '@common/constants';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { SUBSCRIBERS_LIMIT } from 'src/common/constants/subscribers-limit.constant';
+import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
+import {
+  UNSUBSCRIBE_SCENE_ID,
+  HELP_SCENE_ID,
+  ADMIN_SCENE_ID,
+} from '@common/constants/scenes.constant';
+import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
 
 @Update()
 export class BotUpdate {

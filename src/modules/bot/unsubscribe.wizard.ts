@@ -1,7 +1,7 @@
 import { Ctx, On, Wizard, WizardStep } from 'nestjs-telegraf';
 import { UNSUBSCRIBE_SCENE_ID } from '../../app.constants';
 import { WizardContext } from 'telegraf/typings/scenes';
-import { SubscriberUseCase } from 'src/use-cases/subscriber/subscriber.use-case';
+import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
 
 @Wizard(UNSUBSCRIBE_SCENE_ID)
 export class UnsubscribeWizard {

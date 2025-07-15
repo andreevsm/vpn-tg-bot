@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
 import { BotModule } from './modules/bot/bot.module';
@@ -23,7 +21,5 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     BotModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

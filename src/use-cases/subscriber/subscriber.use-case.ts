@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { SubscriberEntity } from 'src/core/entities/subscriber';
-import { SubscriberRepository } from 'src/core/repositories/subscriber.repository';
+import { SubscriberEntity } from '@core/entities/subscriber';
+import { SubscriberRepository } from '@core/repositories/subscriber.repository';
 
 @Injectable()
 export class SubscriberUseCase {

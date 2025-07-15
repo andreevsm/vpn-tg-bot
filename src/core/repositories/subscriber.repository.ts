@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { SubscriberEntity } from '../entities/subscriber';
 import { Injectable } from '@nestjs/common';
 
