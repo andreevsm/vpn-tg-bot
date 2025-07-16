@@ -1,3 +1,5 @@
+import { Scenes } from 'telegraf';
+
 export type Subscriber = {
   id: number;
   firstName: string;
@@ -18,3 +20,5 @@ export enum SubscriptionPlan {
   MONTH = 'month',
   NOT_FOUND = 'not_found',
 }
+
+export type Context = Scenes.SceneContext;

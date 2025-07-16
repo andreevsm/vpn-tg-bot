@@ -1,6 +1,6 @@
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
-import { Context, Scenes, Telegraf } from 'telegraf';
-import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { Telegraf } from 'telegraf';
+import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
 import { Commands } from '@common/constants';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
@@ -10,11 +10,13 @@ import {
   ADMIN_SCENE_ID,
 } from '@common/constants/scenes.constant';
 import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
-import { UseGuards } from '@nestjs/common';
+import { UseFilters, UseGuards } from '@nestjs/common';
 import { ADMIN_IDS } from '@common/constants/admin-ids.constant';
 import { AdminGuard } from '@common/guards/admin.guard';
+import { TelegrafExceptionFilter } from '@common/filters/telegraf-exception.filter';
 
 @Update()
+@UseFilters(TelegrafExceptionFilter)
 export class BotUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
@@ -23,9 +25,7 @@ export class BotUpdate {
   ) {}
 
   @Start()
-  async onStart(@Ctx() ctx: Scenes.SceneContext) {
-    console.log(ctx.message.from);
-
+  async onStart(@Ctx() ctx: Context) {
     const nickname = ctx.message.from.username;
     const userId = ctx.message.from.id;
 
@@ -95,7 +95,7 @@ export class BotUpdate {
     }
 
     ctx.sendMessage(
-      'Привет! Меня зовут ANSE VPN Bot и я помогу тебе за 2 шага настроить VPN',
+      'Привет! Меня зовут ANSE VPN Bot и я помогу тебе настроить VPN',
       {
         reply_markup: {
           one_time_keyboard: true,
@@ -113,7 +113,7 @@ export class BotUpdate {
   }
 
   @On('callback_query')
-  async on(@Ctx() ctx: Scenes.SceneContext) {
+  async on(@Ctx() ctx: Context) {
     const answer = (ctx.update as any).callback_query.data;
     const userInfo = (ctx.update as any).callback_query.from;
     const nickname = userInfo?.username;
@@ -635,13 +635,8 @@ export class BotUpdate {
     return handler();
   }
 
-  // @On('text')
-  // async onText() {
-  //   return 'Я не умею распознавать такие сообщения';
-  // }
-
   @Command(Commands.SUBSCRIPTION)
-  async onSubscriptionCommand(@Ctx() ctx: Scenes.SceneContext) {
+  async onSubscriptionCommand(@Ctx() ctx: Context) {
     const nickname = ctx.message.from.username;
     const subscriber =
       this.subscriberUserCase.getSubscriberByNickname(nickname);
@@ -656,18 +651,18 @@ export class BotUpdate {
   }
 
   @Command(Commands.UNSUBSCRIBE)
-  async onUnsubscribeCommand(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+  async onUnsubscribeCommand(@Ctx() ctx: Context): Promise<void> {
     await ctx.scene.enter(UNSUBSCRIBE_SCENE_ID);
   }
 
   @Command(Commands.HELP)
-  async onHelpCommand(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+  async onHelpCommand(@Ctx() ctx: Context): Promise<void> {
     await ctx.scene.enter(HELP_SCENE_ID);
   }
 
   @Command(Commands.ADMIN)
   @UseGuards(AdminGuard)
-  async onAdminCommand(@Ctx() ctx: Scenes.SceneContext): Promise<void> {
+  async onAdminCommand(@Ctx() ctx: Context): Promise<void> {
     console.log('mmmm', (ctx.update as any).message);
 
     await ctx.scene.enter(ADMIN_SCENE_ID);
