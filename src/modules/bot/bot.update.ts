@@ -590,40 +590,6 @@ export class BotUpdate {
           return `Поздравляю! Теперь ты можешь без проблем смотреть Reels и Shorts, но не забывай, что ровно через 24 часа demo режим закончится`;
         }
       },
-
-      unsubscribe_yes: () => {
-        const removedSubscriber =
-          this.subscriberUserCase.getSubscriberByNickname(nickname);
-
-        if (removedSubscriber) {
-          this.subscriberUserCase.removeSubscriber(removedSubscriber);
-          return 'Пока! Надеюсь, что ты вернешься снова';
-        }
-      },
-
-      unsubscribe_no: () => {
-        return 'Благодарю!';
-      },
-
-      unsubscribe_trial_yes: () => {
-        const removedSubscriber = this.subscriberUserCase
-          .getSubscribers()
-          .find(
-            (sub) =>
-              sub.nickname === nickname &&
-              sub.subscription.plan === SubscriptionPlan.TRIAL &&
-              sub.subscription.status === SubscriptionStatus.ACTIVE,
-          );
-
-        if (removedSubscriber) {
-          this.subscriberUserCase.removeSubscriber(removedSubscriber);
-          return 'Пока! Надеюсь, что ты вернешься снова';
-        }
-      },
-
-      unsubscribe_trial_no: () => {
-        return 'Благодарю!';
-      },
     };
 
     const handler = handlers[answer];
