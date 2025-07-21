@@ -14,10 +14,14 @@ import { UseFilters, UseGuards } from '@nestjs/common';
 import { ADMIN_IDS } from '@common/constants/admin-ids.constant';
 import { AdminGuard } from '@common/guards/admin.guard';
 import { TelegrafExceptionFilter } from '@common/filters/telegraf-exception.filter';
+import { FSM } from '@common/fsm';
+import { SUBSCRIPTION_STATE } from './bot.config';
 
 @Update()
 @UseFilters(TelegrafExceptionFilter)
 export class BotUpdate {
+  private subscriptionFSM = new FSM(SUBSCRIPTION_STATE);
+
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
     private subscriberUserCase: SubscriberUseCase,
@@ -118,13 +122,17 @@ export class BotUpdate {
     const userInfo = (ctx.update as any).callback_query.from;
     const nickname = userInfo?.username;
 
+    this.subscriptionFSM.transitionTo(answer);
+
+    ctx.sendMessage(this.subscriptionFSM.getValue());
+
     const handlers = {
       excellent: () => {
         ctx.sendMessage(
           `
-          Перед тем, как мы продолжим, важно сказать.
-          \nПодписка на меня стоит 200 рублей в месяц. Помимо этого у тебя будет возможность использовать demo режим и целых 24 часа пользоваться VPN бесплатно.
-          \nЯ очень хочу, чтобы ты на 100% убедился в скорости работы VPN`,
+              Перед тем, как мы продолжим, важно сказать.
+              \nПодписка на меня стоит 200 рублей в месяц. Помимо этого у тебя будет возможность использовать demo режим и целых 24 часа пользоваться VPN бесплатно.
+              \nЯ очень хочу, чтобы ты на 100% убедился в скорости работы VPN`,
           {
             reply_markup: {
               inline_keyboard: [
@@ -147,7 +155,7 @@ export class BotUpdate {
       demo_subscription: () => {
         ctx.sendMessage(
           `Для начала скачай приложение WireGuard, оно доступно в [Google Play](https://play.google.com/store/apps/details?id=com.wireguard.android&hl=ru) и [App Store](https://apps.apple.com/ru/app/wireguard/id1441195209)
-Если хочешь использовать VPN на компьютере, то можешь скачать приложение с [официального сайта](https://www.wireguard.com/install/)`,
+    Если хочешь использовать VPN на компьютере, то можешь скачать приложение с [официального сайта](https://www.wireguard.com/install/)`,
           {
             parse_mode: 'MarkdownV2',
             reply_markup: {
@@ -417,7 +425,7 @@ export class BotUpdate {
 
         ctx.sendMessage(
           `Отлично! Я проверю твой платеж, а пока скачай приложение WireGuard, оно доступно в Google Play (https://play.google.com/store/apps/details?id=com.wireguard.android&hl=ru) и App Store (https://apps.apple.com/ru/app/wireguard/id1441195209). Если хочешь использовать VPN на компьютере, то можешь скачать приложение из официального сайта https://www.wireguard.com/install/
-          `,
+              `,
           {
             reply_markup: {
               inline_keyboard: [
