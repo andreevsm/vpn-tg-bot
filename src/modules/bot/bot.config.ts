@@ -4,7 +4,7 @@ import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 export const SUBSCRIPTION_STATE = {
   initialValue: BotActions.START,
   transitions: {
-    [BotActions.START]: BotActions.EXCELLENT,
+    [BotActions.START]: [BotActions.EXCELLENT, BotActions.PAY_NOW],
     [BotActions.EXCELLENT]: [BotActions.PAY_NOW, BotActions.DEMO_SUBSCRIPTION],
     [BotActions.DEMO_SUBSCRIPTION]: BotActions.APP_DOWNLOADED,
     [BotActions.APP_DOWNLOADED]: BotActions.FILE_DOWNLOADED,
@@ -29,7 +29,20 @@ export const BOT_CONFIG: Record<
   { text: string; data?: ExtraReplyMessage | any }
 > = {
   [BotActions.START]: {
-    text: 'test',
+    text: 'Привет! Меня зовут ANSE VPN Bot и я помогу тебе настроить VPN',
+    data: {
+      reply_markup: {
+        one_time_keyboard: true,
+        inline_keyboard: [
+          [
+            {
+              text: 'Отлично!',
+              callback_data: 'excellent',
+            },
+          ],
+        ],
+      },
+    },
   },
   [BotActions.EXCELLENT]: {
     text: `Перед тем, как мы продолжим, важно сказать.
