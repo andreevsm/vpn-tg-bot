@@ -6,6 +6,7 @@ import { UnsubscribeWizard } from './unsubscribe.wizard';
 import { HelpWizard } from './help.wizard';
 import { AdminWizard } from './admin.wizard';
 import { SubscriptionFsmService } from './subscription-fsm.service';
+import { LogService } from '@common/log.service';
 
 @Module({
   providers: [
@@ -16,6 +17,7 @@ import { SubscriptionFsmService } from './subscription-fsm.service';
     HelpWizard,
     AdminWizard,
     SubscriptionFsmService,
+    LogService,
   ],
 })
 export class BotModule {}
