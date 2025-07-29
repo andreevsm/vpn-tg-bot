@@ -6,7 +6,7 @@ import { WizardContext } from 'telegraf/typings/scenes';
 export class HelpWizard {
   @WizardStep(1)
   async onSceneEnter(@Ctx() ctx: WizardContext): Promise<string> {
-    await ctx.wizard.next();
+    ctx.wizard.next();
     return 'Напиши свой вопрос';
   }
 

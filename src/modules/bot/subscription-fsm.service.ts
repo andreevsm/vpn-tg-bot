@@ -28,69 +28,121 @@ export class SubscriptionFsmService {
     [BotActions.DEMO_SUBSCRIPTION]: async (ctx, message) => {
       const userInfo = ctx.callbackQuery.from;
       const nickname = userInfo?.username;
+      const subscriber =
+        this.subscriberUseCase.getSubscriberByNickname(nickname);
+
+      console.log('subscriber', subscriber);
+
+      if (!!subscriber) {
+        if (
+          subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+          subscriber.subscription.status === SubscriptionStatus.EXPIRED
+        ) {
+          ctx.sendMessage(
+            'Твоя Demo подписка закончилась. Для оформления месячной подписки введи /start',
+          );
+          return;
+        }
+      }
+
+      ctx.session['plan'] = SubscriptionPlan.TRIAL;
+      ctx.session['status'] = SubscriptionStatus.ACTIVE;
+
+      ctx.sendMessage(message.text, message.data);
+    },
+    [BotActions.APP_DOWNLOADED]: async (ctx, message) => {
+      const userInfo = ctx.callbackQuery.from;
+      const nickname = userInfo?.username;
+
+      const status = ctx.session['status'];
+      const plan = ctx.session['plan'];
+
+      const currentTime = +new Date();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+      const oneDayExpiredAtTime = currentTime + oneDay;
+      const thirtyDaysExpiredAtTime = currentTime + thirtyDays;
+
+      const exparedAt =
+        plan === SubscriptionPlan.MONTH
+          ? thirtyDaysExpiredAtTime
+          : oneDayExpiredAtTime;
 
       const subscriber =
         this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-      if (
-        subscriber?.subscription.plan === SubscriptionPlan.TRIAL &&
-        subscriber?.subscription.status === SubscriptionStatus.ACTIVE
-      ) {
-        return `Твоя подписка активна до: ${new Date(
-          subscriber.exparedAt,
-        ).toLocaleString()}`;
+      if (!!subscriber) {
+        await ctx.telegram.sendDocument(ctx.chat.id, {
+          source: `vpn-configs/${subscriber.configName}.conf`,
+        });
+        ctx.sendMessage('Вижу, что у тебя уже есть файл с настройками!');
+        this.subscriberUseCase.updateSubscriber({
+          ...subscriber,
+          exparedAt,
+          subscription: {
+            plan,
+            status,
+          },
+        });
+
+        ctx.session['plan'] = undefined;
+        ctx.session['status'] = undefined;
+
+        return;
       }
 
       const subscribersCount = this.subscriberUseCase
         .getSubscribers()
         .filter((sub) => sub.configName !== '').length;
 
-      const currentTime = +new Date();
-      const oneDay = 24 * 60 * 60 * 1000;
-      const expiredAtTime = currentTime + oneDay;
+      const fileName = `anse-vpn-bot-${subscribersCount + 1}`;
+
+      await ctx.telegram.sendDocument(ctx.chat.id, {
+        source: `vpn-configs/${fileName}.conf`,
+      });
 
       this.subscriberUseCase.addSubscriber({
         id: userInfo.id,
         firstName: userInfo['first_name'],
         nickname,
         createdAt: currentTime,
-        exparedAt: expiredAtTime,
+        exparedAt,
         configName: `anse-vpn-bot-${subscribersCount + 1}`,
         subscription: {
-          plan: SubscriptionPlan.TRIAL,
-          status: SubscriptionStatus.ACTIVE,
+          plan,
+          status,
         },
       });
+
+      ctx.session['plan'] = undefined;
+      ctx.session['status'] = undefined;
 
       const timeoutId = setTimeout(() => {
         const subscriber =
           this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-        const subscriberWithExpiredTrial = {
-          ...subscriber,
-          configName: '',
-          subscription: {
-            plan: SubscriptionPlan.TRIAL,
-            status: SubscriptionStatus.EXPIRED,
-          },
-        };
+        if (
+          subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+          subscriber.subscription.status === SubscriptionStatus.ACTIVE
+        ) {
+          const subscriberWithExpiredTrial = {
+            ...subscriber,
+            configName: '',
+            subscription: {
+              plan: SubscriptionPlan.TRIAL,
+              status: SubscriptionStatus.EXPIRED,
+            },
+          };
 
-        this.subscriberUseCase.updateSubscriber(subscriberWithExpiredTrial);
-        ctx.sendMessage('Твоя демо подписка закончилась!');
+          this.subscriberUseCase.updateSubscriber(subscriberWithExpiredTrial);
+          ctx.sendMessage('Твоя Demo подписка закончилась!');
+        }
       }, oneDay);
 
-      this.schedulerRegistry.addTimeout('trial-exprided', timeoutId);
-
-      ctx.sendMessage(message.text, message.data);
-    },
-    [BotActions.APP_DOWNLOADED]: async (ctx, message) => {
-      const subscribersCount = this.subscriberUseCase
-        .getSubscribers()
-        .filter((sub) => sub.configName !== '').length;
-
-      await ctx.telegram.sendDocument(ctx.chat.id, {
-        source: `vpn-configs/anse-vpn-bot-${subscribersCount}.conf`,
-      });
+      this.schedulerRegistry.addTimeout(
+        `trial-exprided-${nickname}`,
+        timeoutId,
+      );
 
       ctx.sendMessage(message.text, message.data);
     },
@@ -161,27 +213,12 @@ export class SubscriptionFsmService {
       }
     },
     [BotActions.PAY_NOW]: async (ctx, message) => {
+      ctx.session['plan'] = SubscriptionPlan.MONTH;
+      ctx.session['status'] = SubscriptionStatus.SHOULD_CHECK;
+
       ctx.sendMessage(message.text, message.data);
     },
     [BotActions.PAY_DONE]: async (ctx, message) => {
-      const userInfo = ctx.callbackQuery.from;
-      const nickname = userInfo?.username;
-
-      this.subscriberUseCase.addSubscriber({
-        id: userInfo.id,
-        firstName: userInfo['first_name'],
-        nickname,
-        createdAt: +new Date(),
-        exparedAt: +new Date() + 30 * 24 * 60 * 60 * 1000,
-        configName: `anse-vpn-bot-${
-          this.subscriberUseCase.getSubscribers().length + 1
-        }`,
-        subscription: {
-          plan: SubscriptionPlan.MONTH,
-          status: SubscriptionStatus.SHOULD_CHECK,
-        },
-      });
-
       ctx.sendMessage(message.text, message.data);
     },
   };
@@ -196,6 +233,10 @@ export class SubscriptionFsmService {
 
     const value = BOT_CONFIG[this.getValue()];
     this.handlers[this.getValue()]?.(ctx, value);
+  }
+
+  public canTransitionTo(currentValue: string): boolean {
+    return this.fsm.canTransitionTo(currentValue);
   }
 
   public getValue(): string {

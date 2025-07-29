@@ -14,6 +14,7 @@ export class AdminWizard {
     await ctx.reply(
       'Выберите действие:',
       Markup.inlineKeyboard([
+        Markup.button.callback('Список пользователей', 'all_users'),
         Markup.button.callback('➕ Добавить пользователя', 'add_user'),
         Markup.button.callback('🗑 Удалить пользователя', 'delete_user'),
       ]),
@@ -25,6 +26,18 @@ export class AdminWizard {
     const action = (ctx.update as any).callback_query.data;
 
     ctx.answerCbQuery();
+
+    if (action === 'all_users') {
+      const subscribers = this.subscriberUseCase
+        .getSubscribers()
+        .map((subscriber) => subscriber.nickname)
+        .join(' ');
+
+      await ctx.reply(subscribers);
+
+      await ctx.scene.leave();
+      return;
+    }
 
     if (action === 'add_user' || action === 'delete_user') {
       ctx.scene.session.state = {

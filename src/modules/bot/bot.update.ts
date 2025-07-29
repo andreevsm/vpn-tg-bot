@@ -1,6 +1,6 @@
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { Context } from '@common/types';
+import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
 import { Commands } from '@common/constants';
 import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@common/constants/scenes.constant';
 import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
 import { UseFilters, UseGuards } from '@nestjs/common';
-import { ADMIN_IDS } from '@common/constants/admin-ids.constant';
+import { ADMIN_NICKNAMES } from '@common/constants/admin-nicknames.constant';
 import { AdminGuard } from '@common/guards/admin.guard';
 import { TelegrafExceptionFilter } from '@common/filters/telegraf-exception.filter';
 import { SubscriptionFsmService } from './subscription-fsm.service';
@@ -28,7 +28,6 @@ export class BotUpdate {
   @Start()
   async onStart(@Ctx() ctx: Context) {
     const nickname = ctx.message.from.username;
-    const userId = ctx.message.from.id;
 
     const commands = [
       { command: Commands.START, description: 'Начать' },
@@ -37,7 +36,7 @@ export class BotUpdate {
       { command: Commands.UNSUBSCRIBE, description: 'Отменить подписку' },
     ];
 
-    if (ADMIN_IDS.includes(userId)) {
+    if (ADMIN_NICKNAMES.includes(nickname)) {
       commands.push({
         command: Commands.ADMIN,
         description: 'Админка',
@@ -57,9 +56,22 @@ export class BotUpdate {
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
     if (!!subscriber) {
-      return `Твоя подписка активна до: ${new Date(
-        subscriber.exparedAt,
-      ).toLocaleString()}`;
+      if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
+        return `Твоя подписка на стадии проверки. Пожалуйста, подожди!`;
+      }
+
+      if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
+        return `Твоя подписка активна до: ${new Date(
+          subscriber.exparedAt,
+        ).toLocaleString()}`;
+      }
+
+      if (
+        subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+        subscriber.subscription.status === SubscriptionStatus.EXPIRED
+      ) {
+        ctx.sendMessage(`Твоя Demo подписка закончилась`);
+      }
     }
 
     this.subscriptionFsmService.reset();
@@ -70,7 +82,12 @@ export class BotUpdate {
   async on(@Ctx() ctx: Context) {
     const answer = (ctx.callbackQuery as CallbackQuery.DataQuery).data;
 
-    this.subscriptionFsmService.transitionTo(ctx, answer);
+    if (this.subscriptionFsmService.canTransitionTo(answer)) {
+      this.subscriptionFsmService.transitionTo(ctx, answer);
+      return;
+    }
+
+    return 'Не могу обработать твой запрос. Попробуй еще раз';
   }
 
   @Command(Commands.SUBSCRIPTION)
@@ -78,10 +95,24 @@ export class BotUpdate {
     const nickname = ctx.message.from.username;
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-    if (!!subscriber) {
+    if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
+      return `Твоя подписка на стадии проверки. Пожалуйста, подожди!`;
+    }
+
+    if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
       return `Твоя подписка активна до: ${new Date(
         subscriber.exparedAt,
       ).toLocaleString()}`;
+    }
+
+    if (
+      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+      subscriber.subscription.status === SubscriptionStatus.EXPIRED
+    ) {
+      ctx.sendMessage(
+        `Твоя Demo подписка закончилась. Для оформления месячной подписки введи /start`,
+      );
+      return;
     }
 
     return 'У тебя нет подписки. Для ее оформления введи /start';

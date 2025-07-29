@@ -32,7 +32,6 @@ export const BOT_CONFIG: Record<
     text: 'Привет! Меня зовут ANSE VPN Bot и я помогу тебе настроить VPN',
     data: {
       reply_markup: {
-        one_time_keyboard: true,
         inline_keyboard: [
           [
             {
