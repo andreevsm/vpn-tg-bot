@@ -31,8 +31,6 @@ export class SubscriptionFsmService {
       const subscriber =
         this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-      console.log('subscriber', subscriber);
-
       if (!!subscriber) {
         if (
           subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
