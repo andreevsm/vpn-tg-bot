@@ -52,10 +52,6 @@ export const BOT_CONFIG: Record<
         inline_keyboard: [
           [
             {
-              text: 'Demo режим',
-              callback_data: BotActions.DEMO_SUBSCRIPTION,
-            },
-            {
               text: 'Оплатить сейчас',
               callback_data: BotActions.PAY_NOW,
             },

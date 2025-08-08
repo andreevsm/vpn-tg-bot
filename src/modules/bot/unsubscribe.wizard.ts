@@ -15,9 +15,20 @@ export class UnsubscribeWizard {
     const subscriber =
       this.subscriberUserCase.getSubscriberByNickname(nickname);
 
+    const hasAlreadyUsedTrial =
+      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+      subscriber.subscription.status === SubscriptionStatus.EXPIRED;
+
+    if (hasAlreadyUsedTrial) {
+      ctx.wizard.next();
+      ctx.sendMessage(
+        'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
+      );
+      return;
+    }
+
     if (!!subscriber) {
       ctx.wizard.next();
-
       ctx.sendMessage(`Ты точно хочешь отказаться?`, {
         reply_markup: {
           inline_keyboard: [

@@ -70,7 +70,9 @@ export class BotUpdate {
         subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
         subscriber.subscription.status === SubscriptionStatus.EXPIRED
       ) {
-        ctx.sendMessage(`Твоя Demo подписка закончилась`);
+        ctx.sendMessage(
+          `Твоя Demo подписка закончилась. Нажми /start для продления подписки`,
+        );
       }
     }
 
@@ -110,7 +112,7 @@ export class BotUpdate {
       subscriber.subscription.status === SubscriptionStatus.EXPIRED
     ) {
       ctx.sendMessage(
-        `Твоя Demo подписка закончилась. Для оформления месячной подписки введи /start`,
+        `Твоя Demo подписка закончилась. Нажми /start для продления подписки`,
       );
       return;
     }

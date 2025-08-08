@@ -15,7 +15,10 @@ export class AdminWizard {
       'Выберите действие:',
       Markup.inlineKeyboard([
         Markup.button.callback('Список пользователей', 'all_users'),
-        Markup.button.callback('➕ Добавить пользователя', 'add_user'),
+        Markup.button.callback(
+          '➕ Подтвердить проверку пользователя',
+          'add_user',
+        ),
         Markup.button.callback('🗑 Удалить пользователя', 'delete_user'),
       ]),
     );
@@ -54,10 +57,6 @@ export class AdminWizard {
     const nickname = (ctx.update as any).message.text as string;
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-    if (!subscriber) {
-      await ctx.reply('Пользователь не найден');
-    }
-
     if (action === 'add_user') {
       this.subscriberUseCase.updateSubscriber({
         ...subscriber,
@@ -67,7 +66,7 @@ export class AdminWizard {
           plan: SubscriptionPlan.MONTH,
         },
       });
-      await ctx.reply(`Пользователь с ником ${nickname} добавлен`);
+      await ctx.reply(`Пользователь с ником ${nickname} проверен`);
 
       return;
     }

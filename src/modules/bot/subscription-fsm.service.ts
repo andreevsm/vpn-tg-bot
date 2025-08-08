@@ -23,7 +23,29 @@ export class SubscriptionFsmService {
     },
     [BotActions.FINISH]: async () => {},
     [BotActions.EXCELLENT]: async (ctx, message) => {
-      ctx.sendMessage(message.text, message.data);
+      const userInfo = ctx.callbackQuery.from;
+      const nickname = userInfo?.username;
+      const subscriber =
+        this.subscriberUseCase.getSubscriberByNickname(nickname);
+
+      const hasAlreadyUsedTrial =
+        subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+        subscriber.subscription.status === SubscriptionStatus.EXPIRED;
+
+      const messageData = {
+        ...message.data,
+      };
+
+      if (!hasAlreadyUsedTrial) {
+        messageData.reply_markup.inline_keyboard[0].push({
+          text: 'Demo режим',
+          callback_data: BotActions.DEMO_SUBSCRIPTION,
+        });
+      }
+
+      console.log('messageData', messageData.reply_markup.inline_keyboard);
+
+      ctx.sendMessage(message.text, messageData);
     },
     [BotActions.DEMO_SUBSCRIPTION]: async (ctx, message) => {
       const userInfo = ctx.callbackQuery.from;
@@ -37,7 +59,7 @@ export class SubscriptionFsmService {
           subscriber.subscription.status === SubscriptionStatus.EXPIRED
         ) {
           ctx.sendMessage(
-            'Твоя Demo подписка закончилась. Для оформления месячной подписки введи /start',
+            'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
           );
           return;
         }
@@ -66,10 +88,12 @@ export class SubscriptionFsmService {
           ? thirtyDaysExpiredAtTime
           : oneDayExpiredAtTime;
 
+      ctx.telegram.sendMessage(367898257, `${nickname}: Проверь подписку`);
+
       const subscriber =
         this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-      if (!!subscriber) {
+      if (!!subscriber && subscriber.configName !== '') {
         await ctx.telegram.sendDocument(ctx.chat.id, {
           source: `vpn-configs/${subscriber.configName}.conf`,
         });
@@ -94,23 +118,37 @@ export class SubscriptionFsmService {
         .filter((sub) => sub.configName !== '').length;
 
       const fileName = `anse-vpn-bot-${subscribersCount + 1}`;
+      console.log('fileName', fileName);
 
       await ctx.telegram.sendDocument(ctx.chat.id, {
         source: `vpn-configs/${fileName}.conf`,
       });
 
-      this.subscriberUseCase.addSubscriber({
-        id: userInfo.id,
-        firstName: userInfo['first_name'],
-        nickname,
-        createdAt: currentTime,
-        exparedAt,
-        configName: `anse-vpn-bot-${subscribersCount + 1}`,
-        subscription: {
-          plan,
-          status,
-        },
-      });
+      if (!!subscriber) {
+        this.subscriberUseCase.updateSubscriber({
+          ...subscriber,
+          createdAt: currentTime,
+          exparedAt,
+          configName: `anse-vpn-bot-${subscribersCount + 1}`,
+          subscription: {
+            plan,
+            status,
+          },
+        });
+      } else {
+        this.subscriberUseCase.addSubscriber({
+          id: userInfo.id,
+          firstName: userInfo['first_name'],
+          nickname,
+          createdAt: currentTime,
+          exparedAt,
+          configName: `anse-vpn-bot-${subscribersCount + 1}`,
+          subscription: {
+            plan,
+            status,
+          },
+        });
+      }
 
       ctx.session['plan'] = undefined;
       ctx.session['status'] = undefined;
@@ -133,7 +171,9 @@ export class SubscriptionFsmService {
           };
 
           this.subscriberUseCase.updateSubscriber(subscriberWithExpiredTrial);
-          ctx.sendMessage('Твоя Demo подписка закончилась!');
+          ctx.sendMessage(
+            'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
+          );
         }
       }, oneDay);
 
