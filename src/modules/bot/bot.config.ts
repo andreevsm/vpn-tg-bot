@@ -1,4 +1,5 @@
 import { BotActions } from '@common/enums/bot-actions.enum';
+import { Texts } from '@common/texts';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
 export const SUBSCRIPTION_STATE = {
@@ -18,7 +19,6 @@ export const SUBSCRIPTION_STATE = {
     [BotActions.WINDOWS]: BotActions.CONFIG_ADDED,
     [BotActions.IOS]: BotActions.CONFIG_ADDED,
     [BotActions.ANDROID]: BotActions.CONFIG_ADDED,
-    [BotActions.CONFIG_ADDED]: BotActions.FINISH,
     [BotActions.PAY_NOW]: BotActions.PAY_DONE,
     [BotActions.PAY_DONE]: BotActions.APP_DOWNLOADED,
   },
@@ -29,7 +29,7 @@ export const BOT_CONFIG: Record<
   { text: string; data?: ExtraReplyMessage | any }
 > = {
   [BotActions.START]: {
-    text: 'Привет! Меня зовут ANSE VPN Bot и я помогу тебе настроить VPN',
+    text: Texts.START,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -44,9 +44,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.EXCELLENT]: {
-    text: `Перед тем, как мы продолжим, важно сказать.
-          \nПодписка на меня стоит 99 рублей в месяц. Помимо этого у тебя будет возможность использовать demo режим и целых 24 часа пользоваться VPN бесплатно.
-          \nЯ очень хочу, чтобы ты на 100% убедился в скорости работы VPN`,
+    text: Texts.EXCELLENT,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -61,8 +59,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.DEMO_SUBSCRIPTION]: {
-    text: `Для начала скачай приложение WireGuard, оно доступно в [Google Play](https://play.google.com/store/apps/details?id=com.wireguard.android&hl=ru) и [App Store](https://apps.apple.com/ru/app/wireguard/id1441195209)
-    Если хочешь использовать VPN на компьютере, то можешь скачать приложение с [официального сайта](https://www.wireguard.com/install/)`,
+    text: Texts.DEMO,
     data: {
       parse_mode: 'MarkdownV2',
       reply_markup: {
@@ -78,7 +75,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.APP_DOWNLOADED]: {
-    text: `Отлично! Вот файл с настройками. Сохрани его на своем устройстве`,
+    text: Texts.APP_DOWNLOADED,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -93,7 +90,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.FILE_DOWNLOADED]: {
-    text: `Теперь укажи свое устройство`,
+    text: Texts.FILE_DOWNLOADED,
     data: {
       reply_markup: {
         one_time_keyboard: true,
@@ -121,7 +118,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.MACOS]: {
-    text: `Заходи в приложение WireGuard и тыкай на плюсик как показано на картинке`,
+    text: Texts.OS,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -136,7 +133,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.WINDOWS]: {
-    text: `Заходи в приложение WireGuard и тыкай на плюсик как показано на картинке`,
+    text: Texts.OS,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -151,7 +148,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.IOS]: {
-    text: `Заходи в приложение WireGuard и тыкай на плюсик как показано на картинке`,
+    text: Texts.OS,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -166,7 +163,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.ANDROID]: {
-    text: `Заходи в приложение WireGuard и тыкай на плюсик как показано на картинке`,
+    text: Texts.OS,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -181,10 +178,10 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.CONFIG_ADDED]: {
-    text: `Теперь ты можешь включать VPN и наслаждаться безопасным интернетом`,
+    text: Texts.CONFIG_ADDED,
   },
   [BotActions.PAY_NOW]: {
-    text: `Переведи на номер карты 5536 9137 5110 3132 сумму 99 руб.`,
+    text: Texts.PAY_NOW,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -199,7 +196,7 @@ export const BOT_CONFIG: Record<
     },
   },
   [BotActions.PAY_DONE]: {
-    text: `Отлично! Я проверю твой платеж, а пока скачай приложение WireGuard, оно доступно в Google Play (https://play.google.com/store/apps/details?id=com.wireguard.android&hl=ru) и App Store (https://apps.apple.com/ru/app/wireguard/id1441195209). Если хочешь использовать VPN на компьютере, то можешь скачать приложение из официального сайта https://www.wireguard.com/install/`,
+    text: Texts.PAY_DONE,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -212,8 +209,5 @@ export const BOT_CONFIG: Record<
         ],
       },
     },
-  },
-  [BotActions.FINISH]: {
-    text: 'test',
   },
 };

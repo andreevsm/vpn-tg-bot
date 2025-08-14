@@ -4,6 +4,7 @@ import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
 import { UNSUBSCRIBE_SCENE_ID } from '@common/constants/scenes.constant';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { Texts } from '@common/texts';
 
 @Wizard(UNSUBSCRIBE_SCENE_ID)
 export class UnsubscribeWizard {
@@ -15,15 +16,9 @@ export class UnsubscribeWizard {
     const subscriber =
       this.subscriberUserCase.getSubscriberByNickname(nickname);
 
-    const hasAlreadyUsedTrial =
-      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-      subscriber.subscription.status === SubscriptionStatus.EXPIRED;
-
-    if (hasAlreadyUsedTrial) {
+    if (this.subscriberUserCase.hasUsedTrial(subscriber)) {
       ctx.wizard.next();
-      ctx.sendMessage(
-        'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
-      );
+      ctx.sendMessage(Texts.DEMO_FINISHED);
       return;
     }
 

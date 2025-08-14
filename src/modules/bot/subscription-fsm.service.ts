@@ -6,6 +6,7 @@ import { BotActions } from '@common/enums/bot-actions.enum';
 import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { Texts } from '@common/texts';
 
 @Injectable()
 export class SubscriptionFsmService {
@@ -21,7 +22,6 @@ export class SubscriptionFsmService {
     [BotActions.START]: async (ctx, message) => {
       ctx.sendMessage(message.text, message.data);
     },
-    [BotActions.FINISH]: async () => {},
     [BotActions.EXCELLENT]: async (ctx, message) => {
       const userInfo = ctx.callbackQuery.from;
       const nickname = userInfo?.username;
@@ -54,13 +54,8 @@ export class SubscriptionFsmService {
         this.subscriberUseCase.getSubscriberByNickname(nickname);
 
       if (!!subscriber) {
-        if (
-          subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-          subscriber.subscription.status === SubscriptionStatus.EXPIRED
-        ) {
-          ctx.sendMessage(
-            'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
-          );
+        if (this.subscriberUseCase.hasUsedTrial(subscriber)) {
+          ctx.sendMessage(Texts.DEMO_FINISHED);
           return;
         }
       }
@@ -171,9 +166,7 @@ export class SubscriptionFsmService {
           };
 
           this.subscriberUseCase.updateSubscriber(subscriberWithExpiredTrial);
-          ctx.sendMessage(
-            'Твоя Demo подписка закончилась. Нажми /start для продления подписки',
-          );
+          ctx.sendMessage(Texts.DEMO_FINISHED);
         }
       }, oneDay);
 

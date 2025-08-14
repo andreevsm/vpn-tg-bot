@@ -27,4 +27,8 @@ export class SubscriberUseCase {
   public updateSubscriber(subscriber: SubscriberEntity): void {
     this.subscriberRepository.updateSubscriber(subscriber);
   }
+
+  public hasUsedTrial(subscriber: SubscriberEntity) {
+    return this.subscriberRepository.hasUsedTrial(subscriber);
+  }
 }

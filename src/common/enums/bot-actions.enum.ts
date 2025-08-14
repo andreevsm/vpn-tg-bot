@@ -11,5 +11,4 @@ export enum BotActions {
   CONFIG_ADDED = 'config_added',
   PAY_NOW = 'pay_now',
   PAY_DONE = 'pay_done',
-  FINISH = 'finish',
 }

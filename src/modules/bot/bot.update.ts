@@ -1,6 +1,6 @@
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { Context, SubscriptionStatus } from '@common/types';
 import { Commands } from '@common/constants';
 import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
 import {
@@ -15,6 +15,7 @@ import { AdminGuard } from '@common/guards/admin.guard';
 import { TelegrafExceptionFilter } from '@common/filters/telegraf-exception.filter';
 import { SubscriptionFsmService } from './subscription-fsm.service';
 import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import { Texts } from '@common/texts';
 
 @Update()
 @UseFilters(TelegrafExceptionFilter)
@@ -50,14 +51,14 @@ export class BotUpdate {
       .filter((sub) => sub.configName !== '').length;
 
     if (subscribersCount === SUBSCRIBERS_LIMIT) {
-      return 'На данный момент желающих слишком много, вернусь к тебе чуть позже. Спасибо за понимание!';
+      return Texts.SUBSCRIPTION_LIMIT;
     }
 
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
     if (!!subscriber) {
       if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
-        return `Твоя подписка на стадии проверки. Пожалуйста, подожди!`;
+        return Texts.SUBSCRIPTION_SHOULD_CHECK;
       }
 
       if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
@@ -66,13 +67,8 @@ export class BotUpdate {
         ).toLocaleString()}`;
       }
 
-      if (
-        subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-        subscriber.subscription.status === SubscriptionStatus.EXPIRED
-      ) {
-        ctx.sendMessage(
-          `Твоя Demo подписка закончилась. Нажми /start для продления подписки`,
-        );
+      if (this.subscriberUseCase.hasUsedTrial(subscriber)) {
+        ctx.sendMessage(Texts.DEMO_FINISHED);
       }
     }
 
@@ -98,7 +94,7 @@ export class BotUpdate {
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
     if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
-      return `Твоя подписка на стадии проверки. Пожалуйста, подожди!`;
+      return Texts.SUBSCRIPTION_SHOULD_CHECK;
     }
 
     if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
@@ -107,17 +103,12 @@ export class BotUpdate {
       ).toLocaleString()}`;
     }
 
-    if (
-      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-      subscriber.subscription.status === SubscriptionStatus.EXPIRED
-    ) {
-      ctx.sendMessage(
-        `Твоя Demo подписка закончилась. Нажми /start для продления подписки`,
-      );
+    if (this.subscriberUseCase.hasUsedTrial(subscriber)) {
+      ctx.sendMessage(Texts.DEMO_FINISHED);
       return;
     }
 
-    return 'У тебя нет подписки. Для ее оформления введи /start';
+    return Texts.SUBSCRIPTION_IS_MISSING;
   }
 
   @Command(Commands.UNSUBSCRIBE)

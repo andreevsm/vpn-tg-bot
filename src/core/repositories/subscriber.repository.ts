@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { SubscriberEntity } from '../entities/subscriber';
 import { Injectable } from '@nestjs/common';
+import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
 
 @Injectable()
 export class SubscriberRepository {
@@ -16,6 +17,17 @@ export class SubscriberRepository {
   ): SubscriberEntity | undefined {
     const subscribers = this.getSubscribers();
     return subscribers.find((subscriber) => subscriber.nickname === nickname);
+  }
+
+  public hasUsedTrial(subscriber: SubscriberEntity) {
+    if (
+      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+      subscriber.subscription.status === SubscriptionStatus.EXPIRED
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   public addSubscriber(subscriber: SubscriberEntity): void {
