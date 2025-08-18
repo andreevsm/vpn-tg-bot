@@ -1,10 +1,12 @@
+import { join } from 'path';
+
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { session } from 'telegraf';
+
 import { BotModule } from './modules/bot/bot.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [

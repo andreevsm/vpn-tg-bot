@@ -1,57 +1,12 @@
-import { readFileSync, writeFileSync } from 'node:fs';
 import { SubscriberEntity } from '../entities/subscriber';
-import { Injectable } from '@nestjs/common';
-import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
 
-@Injectable()
-export class SubscriberRepository {
-  public getSubscribers(): SubscriberEntity[] {
-    const subscribersJSON = readFileSync('db/subscribers.json', {
-      encoding: 'utf8',
-    });
-    return JSON.parse(subscribersJSON);
-  }
-
-  public getSubscriberByNickname(
+export abstract class SubscriberRepository {
+  abstract getSubscribers(): SubscriberEntity[];
+  abstract getSubscriberByNickname(
     nickname: string,
-  ): SubscriberEntity | undefined {
-    const subscribers = this.getSubscribers();
-    return subscribers.find((subscriber) => subscriber.nickname === nickname);
-  }
-
-  public hasUsedTrial(subscriber: SubscriberEntity) {
-    if (
-      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-      subscriber.subscription.status === SubscriptionStatus.EXPIRED
-    ) {
-      return true;
-    }
-
-    return false;
-  }
-
-  public addSubscriber(subscriber: SubscriberEntity): void {
-    const subscribers = this.getSubscribers();
-    writeFileSync(
-      'db/subscribers.json',
-      JSON.stringify([...subscribers, subscriber]),
-    );
-  }
-
-  public removeSubscriber(subscriber: SubscriberEntity): void {
-    const subscribers = this.getSubscribers();
-    const newSubscribers = subscribers.filter(
-      (s) => s.nickname !== subscriber.nickname,
-    );
-    writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
-  }
-
-  public updateSubscriber(subscriber: SubscriberEntity): void {
-    const subscribers = this.getSubscribers();
-    const newSubscribers = subscribers.map((s) =>
-      s.nickname === subscriber.nickname ? { ...subscriber } : { ...s },
-    );
-
-    writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
-  }
+  ): SubscriberEntity | undefined;
+  abstract hasUsedTrial(subscriber: SubscriberEntity): boolean;
+  abstract addSubscriber(subscriber: SubscriberEntity): void;
+  abstract removeSubscriber(subscriber: SubscriberEntity): void;
+  abstract updateSubscriber(subscriber: SubscriberEntity): void;
 }

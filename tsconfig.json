@@ -20,7 +20,8 @@
     "paths": {
       "@common/*": ["./src/common/*"],
       "@use-cases/*": ["./src/use-cases/*"],
-      "@core/*": ["./src/core/*"]
+      "@core/*": ["./src/core/*"],
+      "@infra/*": ["./src/infra/*"]
     }
   }
 }

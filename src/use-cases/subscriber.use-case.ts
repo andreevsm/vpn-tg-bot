@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+
 import { SubscriberEntity } from '@core/entities/subscriber';
 import { SubscriberRepository } from '@core/repositories/subscriber.repository';
 
 @Injectable()
 export class SubscriberUseCase {
-  constructor(private subscriberRepository: SubscriberRepository) {}
+  constructor(private readonly subscriberRepository: SubscriberRepository) {}
 
   public getSubscribers(): SubscriberEntity[] {
     return this.subscriberRepository.getSubscribers();
@@ -16,15 +17,15 @@ export class SubscriberUseCase {
     return this.subscriberRepository.getSubscriberByNickname(nickname);
   }
 
-  public addSubscriber(subscriber: SubscriberEntity): void {
+  public addSubscriber(subscriber: SubscriberEntity) {
     this.subscriberRepository.addSubscriber(subscriber);
   }
 
-  public removeSubscriber(subscriber: SubscriberEntity): void {
+  public removeSubscriber(subscriber: SubscriberEntity) {
     this.subscriberRepository.removeSubscriber(subscriber);
   }
 
-  public updateSubscriber(subscriber: SubscriberEntity): void {
+  public updateSubscriber(subscriber: SubscriberEntity) {
     this.subscriberRepository.updateSubscriber(subscriber);
   }
 

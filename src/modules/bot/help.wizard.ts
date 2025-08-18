@@ -1,6 +1,9 @@
-import { HELP_SCENE_ID } from '@common/constants/scenes.constant';
 import { Ctx, Message, On, Wizard, WizardStep } from 'nestjs-telegraf';
-import { WizardContext } from 'telegraf/typings/scenes';
+
+import { HELP_SCENE_ID } from '@common/constants/scenes.constant';
+import { isCommand } from '@common/is-command';
+
+import type { WizardContext } from 'telegraf/typings/scenes';
 
 @Wizard(HELP_SCENE_ID)
 export class HelpWizard {
@@ -17,6 +20,10 @@ export class HelpWizard {
     @Message() msg: { text: string },
   ): Promise<string> {
     await ctx.scene.leave();
+
+    if (isCommand(msg.text)) {
+      return;
+    }
 
     const nickname = ctx.message.from.username;
 

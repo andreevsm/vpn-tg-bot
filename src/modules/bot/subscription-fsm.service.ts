@@ -1,12 +1,15 @@
-import { FSM } from '@common/fsm';
 import { Injectable } from '@nestjs/common';
-import { BOT_CONFIG, SUBSCRIPTION_STATE } from './bot.config';
-import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
-import { BotActions } from '@common/enums/bot-actions.enum';
-import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
 import { SchedulerRegistry } from '@nestjs/schedule';
-import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+
+import { BotActions } from '@common/enums/bot-actions.enum';
+import { FSM } from '@common/fsm';
 import { Texts } from '@common/texts';
+import { Context, SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { SubscriberUseCase } from '@use-cases/subscriber.use-case';
+
+import { BOT_CONFIG, SUBSCRIPTION_STATE } from './bot.config';
+
+import type { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
 @Injectable()
 export class SubscriptionFsmService {
@@ -28,22 +31,23 @@ export class SubscriptionFsmService {
       const subscriber =
         this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-      const hasAlreadyUsedTrial =
-        subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
-        subscriber.subscription.status === SubscriptionStatus.EXPIRED;
-
       const messageData = {
         ...message.data,
       };
 
-      if (!hasAlreadyUsedTrial) {
-        messageData.reply_markup.inline_keyboard[0].push({
-          text: 'Demo режим',
-          callback_data: BotActions.DEMO_SUBSCRIPTION,
-        });
-      }
+      const hasAlreadyUsedTrial =
+        subscriber?.subscription.plan === SubscriptionPlan.TRIAL &&
+        subscriber?.subscription.status === SubscriptionStatus.EXPIRED;
 
-      console.log('messageData', messageData.reply_markup.inline_keyboard);
+      if (!hasAlreadyUsedTrial) {
+        messageData.reply_markup.inline_keyboard[0] = [
+          ...messageData.reply_markup.inline_keyboard[0],
+          {
+            text: 'Demo режим',
+            callback_data: BotActions.DEMO_SUBSCRIPTION,
+          },
+        ];
+      }
 
       ctx.sendMessage(message.text, messageData);
     },
@@ -180,30 +184,16 @@ export class SubscriptionFsmService {
     [BotActions.FILE_DOWNLOADED]: async (ctx, message) => {
       ctx.sendMessage(message.text, message.data);
     },
-    [BotActions.ANDROID]: async (ctx, message) => {
+    [BotActions.MOBILE]: async (ctx, message) => {
       await ctx.replyWithPhoto({
-        source: `${process.cwd()}/public/wire_guard_ios.jpeg`,
+        source: `${process.cwd()}/public/wire_guard_mobile.jpeg`,
       });
 
       ctx.sendMessage(message.text, message.data);
     },
-    [BotActions.IOS]: async (ctx, message) => {
-      await ctx.replyWithPhoto({
-        source: `${process.cwd()}/public/wire_guard_ios.jpeg`,
-      });
-
-      ctx.sendMessage(message.text, message.data);
-    },
-    [BotActions.MACOS]: async (ctx, message) => {
-      await ctx.replyWithPhoto({
-        source: `${process.cwd()}/public/wire_guard_ios.jpeg`,
-      });
-
-      ctx.sendMessage(message.text, message.data);
-    },
-    [BotActions.WINDOWS]: async (ctx, message) => {
-      await ctx.replyWithPhoto({
-        source: `${process.cwd()}/public/wire_guard_ios.jpeg`,
+    [BotActions.PC]: async (ctx, message) => {
+      await ctx.replyWithDocument({
+        source: `${process.cwd()}/public/wire_guard_pc.pdf`,
       });
 
       ctx.sendMessage(message.text, message.data);

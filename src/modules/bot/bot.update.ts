@@ -1,21 +1,24 @@
+import { UseFilters, UseGuards } from '@nestjs/common';
 import { Command, Ctx, Start, Update, InjectBot, On } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
-import { Context, SubscriptionStatus } from '@common/types';
+
 import { Commands } from '@common/constants';
-import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
+import { ADMIN_NICKNAMES } from '@common/constants/admin-nicknames.constant';
 import {
   UNSUBSCRIBE_SCENE_ID,
   HELP_SCENE_ID,
   ADMIN_SCENE_ID,
 } from '@common/constants/scenes.constant';
-import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
-import { UseFilters, UseGuards } from '@nestjs/common';
-import { ADMIN_NICKNAMES } from '@common/constants/admin-nicknames.constant';
-import { AdminGuard } from '@common/guards/admin.guard';
+import { SUBSCRIBERS_LIMIT } from '@common/constants/subscribers-limit.constant';
 import { TelegrafExceptionFilter } from '@common/filters/telegraf-exception.filter';
-import { SubscriptionFsmService } from './subscription-fsm.service';
-import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import { AdminGuard } from '@common/guards/admin.guard';
 import { Texts } from '@common/texts';
+import { Context, SubscriptionStatus } from '@common/types';
+import { SubscriberUseCase } from '@use-cases/subscriber.use-case';
+
+import { SubscriptionFsmService } from './subscription-fsm.service';
+
+import type { CallbackQuery } from 'telegraf/typings/core/types/typegram';
 
 @Update()
 @UseFilters(TelegrafExceptionFilter)
@@ -28,6 +31,10 @@ export class BotUpdate {
 
   @Start()
   async onStart(@Ctx() ctx: Context) {
+    if (ctx.scene?.current) {
+      await ctx.scene.leave();
+    }
+
     const nickname = ctx.message.from.username;
 
     const commands = [
@@ -93,19 +100,21 @@ export class BotUpdate {
     const nickname = ctx.message.from.username;
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
-    if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
-      return Texts.SUBSCRIPTION_SHOULD_CHECK;
-    }
+    if (!!subscriber) {
+      if (subscriber.subscription.status === SubscriptionStatus.SHOULD_CHECK) {
+        return Texts.SUBSCRIPTION_SHOULD_CHECK;
+      }
 
-    if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
-      return `Твоя подписка активна до: ${new Date(
-        subscriber.exparedAt,
-      ).toLocaleString()}`;
-    }
+      if (subscriber.subscription.status === SubscriptionStatus.ACTIVE) {
+        return `Твоя подписка активна до: ${new Date(
+          subscriber.exparedAt,
+        ).toLocaleString()}`;
+      }
 
-    if (this.subscriberUseCase.hasUsedTrial(subscriber)) {
-      ctx.sendMessage(Texts.DEMO_FINISHED);
-      return;
+      if (this.subscriberUseCase.hasUsedTrial(subscriber)) {
+        ctx.sendMessage(Texts.DEMO_FINISHED);
+        return;
+      }
     }
 
     return Texts.SUBSCRIPTION_IS_MISSING;

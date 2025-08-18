@@ -1,0 +1,60 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+
+import { Injectable } from '@nestjs/common';
+
+import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { SubscriberEntity } from '@core/entities/subscriber';
+import { SubscriberRepository } from '@core/repositories/subscriber.repository';
+
+@Injectable()
+export class FileSubscriberRepository extends SubscriberRepository {
+  public getSubscribers(): SubscriberEntity[] {
+    const subscribersJSON = readFileSync('db/subscribers.json', {
+      encoding: 'utf8',
+    });
+    return JSON.parse(subscribersJSON);
+  }
+
+  public getSubscriberByNickname(
+    nickname: string,
+  ): SubscriberEntity | undefined {
+    const subscribers = this.getSubscribers();
+    return subscribers.find((subscriber) => subscriber.nickname === nickname);
+  }
+
+  public hasUsedTrial(subscriber: SubscriberEntity) {
+    if (
+      subscriber.subscription.plan === SubscriptionPlan.TRIAL &&
+      subscriber.subscription.status === SubscriptionStatus.EXPIRED
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  public addSubscriber(subscriber: SubscriberEntity): void {
+    const subscribers = this.getSubscribers();
+    writeFileSync(
+      'db/subscribers.json',
+      JSON.stringify([...subscribers, subscriber]),
+    );
+  }
+
+  public removeSubscriber(subscriber: SubscriberEntity): void {
+    const subscribers = this.getSubscribers();
+    const newSubscribers = subscribers.filter(
+      (s) => s.nickname !== subscriber.nickname,
+    );
+    writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
+  }
+
+  public updateSubscriber(subscriber: SubscriberEntity): void {
+    const subscribers = this.getSubscribers();
+    const newSubscribers = subscribers.map((s) =>
+      s.nickname === subscriber.nickname ? { ...subscriber } : { ...s },
+    );
+
+    writeFileSync('db/subscribers.json', JSON.stringify(newSubscribers));
+  }
+}

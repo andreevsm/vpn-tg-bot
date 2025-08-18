@@ -9,8 +9,8 @@ export class FSM {
   private state!: State;
   private currentValue!: string;
 
-  constructor(private _state: State) {
-    this.state = _state;
+  constructor(data: State) {
+    this.state = data;
     this.currentValue = this.state.initialValue;
   }
 

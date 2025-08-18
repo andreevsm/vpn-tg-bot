@@ -1,7 +1,8 @@
-import { LogService } from '@common/log.service';
-import { Context } from '@common/types';
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { TelegrafArgumentsHost } from 'nestjs-telegraf';
+
+import { LogService } from '@common/logger';
+import { Context } from '@common/types';
 
 @Catch()
 export class TelegrafExceptionFilter implements ExceptionFilter {

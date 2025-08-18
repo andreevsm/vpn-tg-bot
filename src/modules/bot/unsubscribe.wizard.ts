@@ -1,10 +1,12 @@
 import { Ctx, On, Wizard, WizardStep } from 'nestjs-telegraf';
-import { WizardContext } from 'telegraf/typings/scenes';
-import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
+
 import { UNSUBSCRIBE_SCENE_ID } from '@common/constants/scenes.constant';
-import { CallbackQuery } from 'telegraf/typings/core/types/typegram';
-import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
 import { Texts } from '@common/texts';
+import { SubscriptionPlan, SubscriptionStatus } from '@common/types';
+import { SubscriberUseCase } from '@use-cases/subscriber.use-case';
+
+import type { CallbackQuery } from 'telegraf/typings/core/types/typegram';
+import type { WizardContext } from 'telegraf/typings/scenes';
 
 @Wizard(UNSUBSCRIBE_SCENE_ID)
 export class UnsubscribeWizard {
@@ -16,13 +18,13 @@ export class UnsubscribeWizard {
     const subscriber =
       this.subscriberUserCase.getSubscriberByNickname(nickname);
 
-    if (this.subscriberUserCase.hasUsedTrial(subscriber)) {
-      ctx.wizard.next();
-      ctx.sendMessage(Texts.DEMO_FINISHED);
-      return;
-    }
-
     if (!!subscriber) {
+      if (this.subscriberUserCase.hasUsedTrial(subscriber)) {
+        ctx.wizard.next();
+        ctx.sendMessage(Texts.DEMO_FINISHED);
+        return;
+      }
+
       ctx.wizard.next();
       ctx.sendMessage(`Ты точно хочешь отказаться?`, {
         reply_markup: {

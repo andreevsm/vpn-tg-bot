@@ -1,6 +1,7 @@
 import { BotActions } from '@common/enums/bot-actions.enum';
 import { Texts } from '@common/texts';
-import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+
+import type { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
 export const SUBSCRIPTION_STATE = {
   initialValue: BotActions.START,
@@ -9,16 +10,9 @@ export const SUBSCRIPTION_STATE = {
     [BotActions.EXCELLENT]: [BotActions.PAY_NOW, BotActions.DEMO_SUBSCRIPTION],
     [BotActions.DEMO_SUBSCRIPTION]: BotActions.APP_DOWNLOADED,
     [BotActions.APP_DOWNLOADED]: BotActions.FILE_DOWNLOADED,
-    [BotActions.FILE_DOWNLOADED]: [
-      BotActions.MACOS,
-      BotActions.WINDOWS,
-      BotActions.IOS,
-      BotActions.ANDROID,
-    ],
-    [BotActions.MACOS]: BotActions.CONFIG_ADDED,
-    [BotActions.WINDOWS]: BotActions.CONFIG_ADDED,
-    [BotActions.IOS]: BotActions.CONFIG_ADDED,
-    [BotActions.ANDROID]: BotActions.CONFIG_ADDED,
+    [BotActions.FILE_DOWNLOADED]: [BotActions.MOBILE, BotActions.PC],
+    [BotActions.MOBILE]: BotActions.CONFIG_ADDED,
+    [BotActions.PC]: BotActions.CONFIG_ADDED,
     [BotActions.PAY_NOW]: BotActions.PAY_DONE,
     [BotActions.PAY_DONE]: BotActions.APP_DOWNLOADED,
   },
@@ -97,28 +91,20 @@ export const BOT_CONFIG: Record<
         inline_keyboard: [
           [
             {
-              text: 'Android',
-              callback_data: BotActions.ANDROID,
+              text: 'Телефон',
+              callback_data: BotActions.MOBILE,
             },
             {
-              text: 'IPhone',
-              callback_data: BotActions.IOS,
-            },
-            {
-              text: 'Windows',
-              callback_data: BotActions.WINDOWS,
-            },
-            {
-              text: 'Mac',
-              callback_data: BotActions.MACOS,
+              text: 'Компьютер',
+              callback_data: BotActions.PC,
             },
           ],
         ],
       },
     },
   },
-  [BotActions.MACOS]: {
-    text: Texts.OS,
+  [BotActions.PC]: {
+    text: Texts.PC,
     data: {
       reply_markup: {
         inline_keyboard: [
@@ -132,38 +118,8 @@ export const BOT_CONFIG: Record<
       },
     },
   },
-  [BotActions.WINDOWS]: {
-    text: Texts.OS,
-    data: {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: 'Готово',
-              callback_data: BotActions.CONFIG_ADDED,
-            },
-          ],
-        ],
-      },
-    },
-  },
-  [BotActions.IOS]: {
-    text: Texts.OS,
-    data: {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: 'Готово',
-              callback_data: BotActions.CONFIG_ADDED,
-            },
-          ],
-        ],
-      },
-    },
-  },
-  [BotActions.ANDROID]: {
-    text: Texts.OS,
+  [BotActions.MOBILE]: {
+    text: Texts.MOBILE,
     data: {
       reply_markup: {
         inline_keyboard: [

@@ -1,18 +1,24 @@
 import { Module } from '@nestjs/common';
-import { BotUpdate } from './bot.update';
-import { SubscriberUseCase } from '@use-cases/subscriber/subscriber.use-case';
+
+import { LogService } from '@common/logger';
 import { SubscriberRepository } from '@core/repositories/subscriber.repository';
-import { UnsubscribeWizard } from './unsubscribe.wizard';
-import { HelpWizard } from './help.wizard';
+import { FileSubscriberRepository } from '@infra/file-subscriber.repository';
+import { SubscriberUseCase } from '@use-cases/subscriber.use-case';
+
 import { AdminWizard } from './admin.wizard';
+import { BotUpdate } from './bot.update';
+import { HelpWizard } from './help.wizard';
 import { SubscriptionFsmService } from './subscription-fsm.service';
-import { LogService } from '@common/log.service';
+import { UnsubscribeWizard } from './unsubscribe.wizard';
 
 @Module({
   providers: [
     BotUpdate,
     SubscriberUseCase,
-    SubscriberRepository,
+    {
+      provide: SubscriberRepository,
+      useClass: FileSubscriberRepository,
+    },
     UnsubscribeWizard,
     HelpWizard,
     AdminWizard,

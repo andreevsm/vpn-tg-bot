@@ -1,7 +1,8 @@
 //config/winston.logger.ts
 
-import { Injectable } from '@nestjs/common';
 import * as path from 'path';
+
+import { Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 
 const customLevels = {

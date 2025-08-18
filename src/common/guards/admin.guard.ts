@@ -1,7 +1,8 @@
-import { ADMIN_NICKNAMES } from '@common/constants/admin-nicknames.constant';
-import { Context } from '@common/types';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { TelegrafExecutionContext, TelegrafException } from 'nestjs-telegraf';
+
+import { ADMIN_NICKNAMES } from '@common/constants/admin-nicknames.constant';
+import { Context } from '@common/types';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
