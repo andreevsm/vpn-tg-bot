@@ -59,6 +59,8 @@ export class AdminWizard {
     const nickname = (ctx.update as any).message.text as string;
     const subscriber = this.subscriberUseCase.getSubscriberByNickname(nickname);
 
+    await ctx.scene.leave();
+
     if (action === 'add_user') {
       this.subscriberUseCase.updateSubscriber({
         ...subscriber,
@@ -79,7 +81,5 @@ export class AdminWizard {
 
       return;
     }
-
-    await ctx.scene.leave();
   }
 }
